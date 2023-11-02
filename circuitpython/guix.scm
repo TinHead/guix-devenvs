@@ -2,7 +2,6 @@
       (guix packages)
       (guix download)
       (guix licenses)
-      (guix gexp)
       (gnu packages python)
       (gnu packages python-xyz)
      (guix build-system copy)
@@ -57,6 +56,7 @@
      `(
       ("python-hatch-vcs" ,python-hatch-vcs)
       ("hatch-reqs" ,hatch-reqs)
+      ("python-pip" ,python-pip)
       ("python-pyserial" ,python-pyserial)
       ("python-hatchling" ,python-hatchling))) 
     (arguments
@@ -69,25 +69,21 @@
   (description "Tool for interacting remotely with @code{MicroPython} devices")
   (license expat)))
   
-(define-public micropython-rp2-pico-w-stubs
-  (package
-    (name "python-micropython-rp2-stubs")
-    (version "1.20.0.post3")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (pypi-uri "micropython_rp2_stubs" version))
-       (sha256
-        (base32 "095ih3832isy10dz54wjrfgpqay3k8l9rb6sqm4sx12l2s2c19bi"))))
-    (build-system python-build-system)
-    (inputs 
-      `(("python" ,python)
-        ("helix-editor-bin" ,helix-editor-bin)
-        ("python-lsp-server", python-lsp-server)
-        ("python-mpremote" ,python-mpremote)))
-     (arguments 
+
+(define circuitpython-stubs
+(package
+  (name "python-circuitpython-stubs")
+  (version "8.2.7")
+  (source
+   (origin
+     (method url-fetch)
+     (uri (pypi-uri "circuitpython-stubs" version))
+     (sha256
+      (base32 "0d41ji5vhd3rsxa9x6cngxmlicifg8dn24q36gmhhrn6a2q6kyjm"))))
+  (build-system python-build-system)
+     (arguments
         ; '(#:install-plan '(("./" "lib/python3.10/site-packages/micropython-rp2-pico-stubs" ))
-        '(#:phases 
+        '(#:phases
           (modify-phases %standard-phases
             (delete 'build)
             (replace 'install ;; Replace the install step with the function defined below
@@ -101,11 +97,55 @@
        (list (search-path-specification
             (variable "GUIX_PYTHONPATH")
             (files (list "/lib/python3.10/site-packages")))))
-    (home-page "https://github.com/josverl/micropython-stubs#micropython-stubs")
-    (synopsis "MicroPython stubs")
-    (description "@code{MicroPython} stubs")
-    (license expat))
+  (inputs 
+    `(("python" ,python))
+      ; ("helix-editor-bin" ,helix-editor-bin)
+      ; ("python-lsp-server", python-lsp-server)
+      ; ("python-mpremote" ,python-mpremote))
+      )
+  (home-page "https://github.com/adafruit/circuitpython")
+  (synopsis "PEP 561 type stubs for CircuitPython")
+  (description "PEP 561 type stubs for @code{CircuitPython}")
+  (license expat))
 )
+
+; (define-public micropython-rp2-pico-w-stubs
+;   (package
+;     (name "python-micropython-rp2-stubs")
+;     (version "1.20.0.post3")
+;     (source
+;      (origin
+;        (method url-fetch)
+;        (uri (pypi-uri "micropython_rp2_stubs" version))
+;        (sha256
+;         (base32 "095ih3832isy10dz54wjrfgpqay3k8l9rb6sqm4sx12l2s2c19bi"))))
+;     (build-system python-build-system)
+;     (inputs
+;       `(("python" ,python)
+;         ("helix-editor-bin" ,helix-editor-bin)
+;         ("python-lsp-server", python-lsp-server)
+;         ("python-mpremote" ,python-mpremote)))
+;      (arguments
+;         ; '(#:install-plan '(("./" "lib/python3.10/site-packages/micropython-rp2-pico-stubs" ))
+;         '(#:phases
+;           (modify-phases %standard-phases
+;             (delete 'build)
+;             (replace 'install ;; Replace the install step with the function defined below
+;                (lambda* (#:key outputs #:allow-other-keys)
+;                  (let* ((outlib (string-append (assoc-ref outputs "out") "/lib/python3.10/site-packages")))
+;                (copy-recursively "." outlib))))
+;             (delete 'check)
+;             (delete 'sanity-check))
+;           #:tests? #f))
+;      (native-search-paths
+;        (list (search-path-specification
+;             (variable "GUIX_PYTHONPATH")
+;             (files (list "/lib/python3.10/site-packages")))))
+;     (home-page "https://github.com/josverl/micropython-stubs#micropython-stubs")
+;     (synopsis "MicroPython stubs")
+;     (description "@code{MicroPython} stubs")
+;     (license expat))
+; )
 
 (define mock-package
   (package
@@ -113,12 +153,12 @@
     (version "0.0.1")
     (source #f)
     (build-system copy-build-system)
-    (inputs 
+    (inputs
       `(("python" ,python)
         ("helix-editor-bin" ,helix-editor-bin)
         ("python-lsp-server", python-lsp-server)
         ("python-mpremote" ,python-mpremote)
-        ("micropython-rp2-pico-w-stubs" ,micropython-rp2-pico-w-stubs)))
+        ("circuitpython-stubs" ,circuitpython-stubs)))
     (synopsis "")
     (description "")
     (home-page "")
@@ -126,5 +166,4 @@
 
 
 mock-package
-;python-mpremote
- 
+
